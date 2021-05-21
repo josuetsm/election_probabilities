@@ -1,0 +1,14 @@
+2;Elecciones Alcaldes;11/04/2021;C;A;14900190;
+3;Elecciones Concejales;11/04/2021;C;C;14900190;
+8;Constituyentes Generales;11/04/2021;D;N;14900190;
+9;Pueblos Indigenas RAPANUI;11/04/2021;G;PR;3623;
+10;Pueblos Indigenas MAPUCHE;11/04/2021;G;PM;1063980;
+11;Pueblos Indigenas ATACAMEÑO;11/04/2021;G;PA;22569;
+12;Pueblos Indigenas AIMARA;11/04/2021;G;PI;75743;
+13;Pueblos Indigenas QUECHUA;11/04/2021;G;PQ;7661;
+14;Pueblos Indigenas COLLA;11/04/2021;G;PC;9183;
+15;Pueblos Indigenas DIAGUITA;11/04/2021;G;PD;53887;
+16;Pueblos Indigenas KAWASHKAR;11/04/2021;G;PK;528;
+17;Pueblos Indigenas YAGAN;11/04/2021;G;PY;170;
+18;Pueblos Indigenas CHANGO;11/04/2021;G;PH;1951;
+1;Elecciones Gobernadores;11/04/2021;R;H;14900190;
