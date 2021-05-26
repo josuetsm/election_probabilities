@@ -1,5 +1,6 @@
 import logging
 from logging.config import dictConfig
+from typing import List, Any, Union
 
 logging_config = dict(
     version=1,
@@ -28,5 +29,7 @@ headers = {'Escenario_Elecciones': ['cod_elec', 'glosa_elec', 'elec_fecha', 'tip
            'Escenario_SubPactos': ['cod_subp', 'cod_pacto', 'glosa_subp'],
            'Escenario_Partidos': ['cod_part', 'glosa_part', 'sigla_part'],
            'Escenario_Zonas': ['cod_zona', 'glosa_zona', 'tipo_zona', 'orden_zona'],
-           'Escenario_ZonasPadre': ['cor_zona', 'tipo_zona', 'cod_zona_pad', 'tipo_zona_pad'],
+           'Escenario_ZonasPadre': ['cod_zona', 'tipo_zona', 'cod_zona_pad', 'tipo_zona_pad'],
            'VOTACION_8': ['cod_elec', 'ambito', 'cod_ambito', 'cod_zona', 'tipo_zona', 'votos']}
+
+district_seats = [3, 3, 4, 4, 6, 8, 7, 7, 6, 7, 6, 6, 4, 5, 5, 4, 7, 4, 5, 7, 4, 3, 6, 4, 3, 4, 3, 3]
