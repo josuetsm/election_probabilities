@@ -5,6 +5,9 @@ from settings import logger, headers
 
 import pandas as pd
 
+from datetime import datetime
+
+
 def download_file(bucket_name, name, filename):
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(bucket_name)
@@ -46,3 +49,30 @@ def load_txt(filename, names=None) -> pd.DataFrame:
         df.columns = headers[basename]
 
     return df
+
+
+def get_candidates_info():
+    candidates = load_txt('data/docs/Escenario_Candidatos_018032.txt')
+    candidates = candidates[candidates['cod_elec'] == 8]
+    servel_imfd = pd.read_csv('data/docs/pactos_servel_imfd.csv')
+    cand2pact = dict(zip(candidates['cod_cand'], candidates['cod_pacto']))
+    pact2imfd = dict(zip(servel_imfd['COD_PACTO'], servel_imfd['COD_IMFD']))
+    pact2imfd[175] = 10  # D26
+    pact2imfd[176] = 10  # D28
+    cod2glosa_imfd = dict(zip(servel_imfd['COD_IMFD'], servel_imfd['GLOSA_IMFD']))
+
+    return candidates, cand2pact, pact2imfd, cod2glosa_imfd
+
+
+def get_time():
+    df = pd.read_csv('data/docs/datatransfer2_info.csv')
+
+    df['atime'] = df['atime'].apply(lambda x: datetime.fromtimestamp(x))
+    df['mtime'] = df['mtime'].apply(lambda x: datetime.fromtimestamp(x))
+
+    df = df[df['name'].apply(lambda x: 'VOTACION_8_' in x)]
+    df['atime_labels'] = df['atime'].apply(lambda x: x.strftime("%H:%M"))
+    df = df[3:-1].reset_index(drop=True)
+
+    return df
+

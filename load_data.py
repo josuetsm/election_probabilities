@@ -1,5 +1,4 @@
 import glob
-import pandas as pd
 from utils import load_txt
 
 files = sorted(glob.glob('data/raw/*.zip'))

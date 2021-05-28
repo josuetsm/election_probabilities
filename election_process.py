@@ -1,10 +1,9 @@
 import numpy as np
 import pandas as pd
+np.set_printoptions(suppress=True)
 
 from tqdm import tqdm
 from utils import load_txt
-
-
 
 
 def recode_party(df):
@@ -162,7 +161,7 @@ def get_district_winners(district_candidates, seats):
 
     add, remove = get_replaces(district_candidates, prelim_winners, n_replaces, underrepresented_gender)
 
-    return np.sort(np.concatenate([prelim_winners[:, 0][~np.isin(prelim_winners[:, 0], remove)], add]))
+    return np.sort(np.concatenate([prelim_winners[:, 0][~np.isin(prelim_winners[:, 0], remove)], add])).astype(int)
 
 
 def get_simulated_votes(district_coms, candidate_votes_by_com, remaining_votes_by_com, n_samples, distribution):
@@ -215,18 +214,19 @@ def get_vote_info(votes):
     com_votes = votes[(votes['tipo_zona'] == 'C') & (votes['ambito'] == 7)]
     turnout = turnout.join(com_votes[['cod_zona', 'votos']].set_index('cod_zona'), on='cod_zona')
     turnout['remaining_votes'] = turnout['votos_esperados_2021'] - turnout['votos']
-    turnout['estimated_remaining_votes'] = turnout.apply(lambda df: int(max(df['votos_esperados_2021'] * 0.05, df['remaining_votes'])), axis = 1)
+    turnout['estimated_remaining_votes'] = turnout.apply(
+        lambda df: int(max(df['votos_esperados_2021'] * 0.01, df['remaining_votes'])), axis=1)
 
-    remaining_votes_by_com = turnout[['cod_zona', 'estimated_remaining_votes']].set_index('cod_zona').to_dict()['estimated_remaining_votes']
+    remaining_votes_by_com = turnout[['cod_zona', 'estimated_remaining_votes']].set_index('cod_zona').to_dict()[
+        'estimated_remaining_votes']
     candidate_votes_by_com = votes.loc[(votes['tipo_zona'] == 'C') & (votes['ambito'] == 4),
                                        ['cod_ambito', 'cod_zona', 'votos']].sort_values('cod_ambito')
-
 
     district2com = zonas_pad[(zonas_pad['tipo_zona'] == 'C') &
                              (zonas_pad['tipo_zona_pad'] == 'D')]
     district2com = dict(district2com.groupby('cod_zona_pad').apply(lambda df: df['cod_zona'].tolist()))
 
-    return candidate_votes_by_com, district2com, candidate_votes_by_com, remaining_votes_by_com
+    return candidate_votes_by_com, district2com, remaining_votes_by_com
 
 
 def translate_to_imfd(simulated_winners, cand2pact, pact2imfd):
@@ -242,8 +242,43 @@ def get_candidate_probs(simulated_winners):
     candidate_probs = np.apply_along_axis(lambda x:
                                           np.bincount(x, minlength=1278),
                                           axis=1,
-                                          arr=simulated_winners-800001)
+                                          arr=simulated_winners - 800001)
     candidate_probs = np.sum(candidate_probs, axis=0) / n_samples
 
     return candidate_probs
 
+
+def get_pact_imfd_counts(simulated_winners_imfd):
+    if len(simulated_winners_imfd.shape) == 1:
+        imfd_counts = np.bincount(simulated_winners_imfd - 1, minlength=11)
+    else:
+        imfd_counts = np.apply_along_axis(lambda x:
+                                         np.bincount(x, minlength=11),
+                                         axis=-1,
+                                         arr=simulated_winners_imfd - 1)
+    return imfd_counts
+
+from scipy import stats
+
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0 * np.array(data)
+    n = len(a)
+    m, se = np.mean(a), stats.sem(a)
+    h = se * stats.t.ppf((1 + confidence) / 2., n - 1)
+    return m, m - h, m + h
+
+
+def get_ci(data, confidence=0.95, n_samples=10000):
+    if np.mean(data) == 0:
+        return 0, 0, 0
+    if len(np.unique(data)) == 1:
+        mean = np.mean(data)
+        return mean, mean, mean
+    kde = stats.gaussian_kde(data.ravel(), bw_method=1)
+    kde_samples = np.sort(kde.resample(n_samples).ravel())
+    lower = kde_samples[int((1 - confidence) * n_samples)]
+    upper = kde_samples[int(confidence * n_samples)]
+    mean = np.mean(kde_samples)
+    return mean, lower, upper
+
+#plt.hist(kde_samples, bins = np.linspace(30, 40, 100))
